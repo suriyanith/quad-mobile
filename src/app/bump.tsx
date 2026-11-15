@@ -12,7 +12,7 @@ import { useSession } from '@/lib/session';
 
 const SPIKE_G = 2.5;
 const DEBOUNCE_MS = 300;
-const WAIT_POLLS = 6;
+const WAIT_POLLS = 15; // keep "waiting" on screen ~15 s so a partner (or a UI test) can catch it
 const PEER_POLLS = 30;
 const POLL_MS = 1000;
 
