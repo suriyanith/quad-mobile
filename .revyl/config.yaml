@@ -8,7 +8,7 @@ build:
     env:
         # Inlined into the JS bundle at build time (.env.local is git-ignored).
         EXPO_PUBLIC_QUAD_URL: https://quad-flame-two.vercel.app
-        # EXPO_PUBLIC_CONVEX_URL: https://<name>.convex.cloud   # add once the Convex cloud deployment exists
+        EXPO_PUBLIC_CONVEX_URL: https://fine-octopus-820.convex.cloud
     profiles:
         preview:
             ios:
