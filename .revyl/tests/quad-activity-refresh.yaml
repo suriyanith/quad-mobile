@@ -1,0 +1,21 @@
+# Create: revyl test create quad-activity-refresh --from-file .revyl/tests/quad-activity-refresh.yaml
+# Run:    revyl test run quad-activity-refresh
+test:
+  metadata:
+    name: quad-activity-refresh
+    platform: ios
+    tags:
+      - smoke
+  build:
+    name: Quad iOS   # must match the Revyl app name exactly (revyl app list)
+  blocks:
+    - type: instructions
+      step_description: Open the Activity tab in the bottom tab bar.
+    - type: instructions
+      step_description: Pull down on the activity list to refresh it, then release.
+    - type: validation
+      step_description: The Activity screen shows either one or more activity items, or an empty state with the heading "No activity yet" and an "Add a note" button.
+    - type: instructions
+      step_description: If an "Add a note" button is visible, tap it.
+    - type: validation
+      step_description: If "Add a note" was tapped, the Notes tab is now open; otherwise the Activity tab still shows its activity items.

@@ -1,9 +1,11 @@
 import { useQuery } from 'convex/react';
-import { FlatList, StyleSheet, Text, View } from 'react-native';
+import { useRouter } from 'expo-router';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { FlatList, RefreshControl, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { api } from '../../convex/_generated/api';
-import { Body, Card, Screen, TAB_BAR_SPACE, usePalette } from '@/components/ui';
+import { Body, Button, Card, Heading, Screen, TAB_BAR_SPACE, usePalette } from '@/components/ui';
 import { useSession } from '@/lib/session';
 
 const KIND_LABEL = {
@@ -26,7 +28,26 @@ export default function ActivityScreen() {
   const { studentId } = useSession();
   const p = usePalette();
   const insets = useSafeAreaInsets();
+  const router = useRouter();
   const items = useQuery(api.activity.list, studentId ? { studentId } : 'skip');
+  const [tick, setTick] = useState(0);
+  const [refreshing, setRefreshing] = useState(false);
+  const refreshTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    const id = setInterval(() => setTick((t) => t + 1), 60_000);
+    return () => {
+      clearInterval(id);
+      if (refreshTimer.current) clearTimeout(refreshTimer.current);
+    };
+  }, []);
+
+  const onRefresh = useCallback(() => {
+    setRefreshing(true);
+    setTick((t) => t + 1);
+    if (refreshTimer.current) clearTimeout(refreshTimer.current);
+    refreshTimer.current = setTimeout(() => setRefreshing(false), 600);
+  }, []);
 
   return (
     <Screen title="Activity" subtitle="What your agent did, live." scroll={false} testID="activity-screen">
@@ -41,11 +62,18 @@ export default function ActivityScreen() {
           testID="activity-list"
           data={items}
           keyExtractor={(it) => it._id}
+          extraData={tick}
+          alwaysBounceVertical
+          refreshControl={
+            <RefreshControl testID="activity-refresh" refreshing={refreshing} onRefresh={onRefresh} tintColor={p.muted} colors={[p.accent]} />
+          }
           contentContainerStyle={{ gap: 12, paddingTop: 12, paddingBottom: insets.bottom + TAB_BAR_SPACE }}
           showsVerticalScrollIndicator={false}
           ListEmptyComponent={
             <Card testID="activity-empty">
+              <Heading>No activity yet</Heading>
               <Body muted>Nothing yet. Text Quad or bump phones with a classmate — updates land here the moment they happen.</Body>
+              <Button label="Add a note" testID="activity-empty-notes" variant="secondary" onPress={() => router.navigate('/notes')} />
             </Card>
           }
           renderItem={({ item }) => (
