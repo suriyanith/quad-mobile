@@ -1,0 +1,33 @@
+# Revyl build config for Quad (Expo, iOS simulator, JS bundled).
+# Shape follows https://docs.revyl.com/remote-builds/configuration (Expo example).
+# Validate with: revyl config validate
+# Build with:    revyl build --platform ios --profile preview --json
+build:
+  framework: expo
+  env:
+    # HUMAN FILL 2/2: your Convex dev deployment URL (https://<name>.convex.cloud).
+    # It is inlined into the JS bundle at build time; .env.local is git-ignored so it must live here.
+    EXPO_PUBLIC_CONVEX_URL: https://REPLACE-ME.convex.cloud
+    EXPO_PUBLIC_QUAD_URL: https://quad-flame-two.vercel.app
+  profiles:
+    preview:
+      ios:
+        # HUMAN FILL 1/2: UUID returned by
+        #   revyl app create --name "Quad iOS" --platform ios --json
+        # (on the Capy path, Capy creates the app and writes this for you)
+        app_id: "REPLACE-WITH-IOS-APP-UUID"
+        setup_commands:
+          - npm ci
+          - npx expo prebuild --platform ios
+          - cd ios && pod install
+        build_commands:
+          # Release = standalone build with the JS bundle embedded (no Metro needed).
+          # Workspace/scheme are derived from whatever name expo prebuild generated.
+          - >-
+            cd ios && WS=$(ls -d *.xcworkspace | head -1) &&
+            xcodebuild -workspace "$WS" -scheme "${WS%.xcworkspace}"
+            -configuration Release -sdk iphonesimulator
+            -destination 'generic/platform=iOS Simulator'
+            -derivedDataPath build ARCHS=arm64
+        output_path: ios/build/Build/Products/Release-iphonesimulator/*.app
+        image: ios-macos-26-xcode-26.5

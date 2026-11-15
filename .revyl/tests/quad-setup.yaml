@@ -1,0 +1,20 @@
+# Create: revyl test create quad-setup --from-file .revyl/tests/quad-setup.yaml
+test:
+  metadata:
+    name: quad-setup
+    platform: ios
+    tags:
+      - smoke
+  build:
+    name: Quad iOS
+  blocks:
+    - type: instructions
+      step_description: Open the Home tab in the bottom tab bar.
+    - type: instructions
+      step_description: Type "Maya" in the first name field.
+    - type: instructions
+      step_description: Type "UC Berkeley" in the school field.
+    - type: instructions
+      step_description: Tap the button that continues or saves the setup form.
+    - type: validation
+      step_description: A button labeled "Text Quad" is visible.

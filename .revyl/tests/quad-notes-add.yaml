@@ -1,0 +1,19 @@
+# Create: revyl test create quad-notes-add --from-file .revyl/tests/quad-notes-add.yaml
+# Run:    revyl test run quad-notes-add
+test:
+  metadata:
+    name: quad-notes-add
+    platform: ios
+    tags:
+      - smoke
+  build:
+    name: Quad iOS   # must match the Revyl app name exactly (revyl app list)
+  blocks:
+    - type: instructions
+      step_description: Open the Notes tab in the bottom tab bar.
+    - type: instructions
+      step_description: Type "Study CS61B with Maya" in the note input field.
+    - type: instructions
+      step_description: Tap the add button next to the note input.
+    - type: validation
+      step_description: A note with the text "Study CS61B with Maya" is visible in the notes list.

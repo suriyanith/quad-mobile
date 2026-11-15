@@ -1,0 +1,16 @@
+# Create: revyl test create quad-bump --from-file .revyl/tests/quad-bump.yaml
+test:
+  metadata:
+    name: quad-bump
+    platform: ios
+    tags:
+      - smoke
+  build:
+    name: Quad iOS
+  blocks:
+    - type: instructions
+      step_description: Open the Bump tab in the bottom tab bar.
+    - type: instructions
+      step_description: Tap the "Simulate bump" button.
+    - type: validation
+      step_description: The screen shows a waiting state, indicating it is waiting for another person to bump.
