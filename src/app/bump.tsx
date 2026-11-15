@@ -7,6 +7,7 @@ import { StyleSheet, Text, View } from 'react-native';
 
 import { api } from '../../convex/_generated/api';
 import { Body, Button, Card, ErrorText, Heading, Screen, usePalette } from '@/components/ui';
+import * as haptics from '@/lib/haptics';
 import * as quad from '@/lib/quad';
 import { useSession } from '@/lib/session';
 
@@ -66,6 +67,7 @@ export default function BumpScreen() {
     phaseRef.current = 'sending';
     setPhase({ name: 'sending' });
     setError(null);
+    haptics.bumpSent();
 
     const { lat, lng } = await position();
     if (session.deviceId) record({ deviceId: session.deviceId, ts, lat, lng }).catch(() => {});
@@ -99,6 +101,7 @@ export default function BumpScreen() {
         setPhase({ name: 'matched', sessionId: res.sessionId, code: res.code, peer: res.peer });
       } else {
         setPhase({ name: 'idle' });
+        haptics.warning();
         setError('No one bumped back. Try again together — both phones at the same moment.');
       }
     } catch (e) {
@@ -108,6 +111,11 @@ export default function BumpScreen() {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [session.state, session.deviceId]);
+
+  useEffect(() => {
+    if (phase.name === 'matched' || phase.name === 'connected') haptics.success();
+    else if (phase.name === 'declined') haptics.warning();
+  }, [phase.name]);
 
   const bumpRef = useRef(bump);
   bumpRef.current = bump;
