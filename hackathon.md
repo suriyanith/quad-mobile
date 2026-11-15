@@ -4,7 +4,7 @@
 - **Event:** The Consumer Mobile Hackathon
 - **What it does:** Mobile companion for Quad, a campus study agent in iMessage: set up your agent, watch a live activity feed of what it did, bump phones with a classmate, and keep notes.
 - **Live app:** not deployed
-- **Repo:** none
+- **Repo:** https://github.com/suriyanith/quad-mobile
 - **Frontend:** not deployed
 - **Convex deployment:** https://fine-octopus-820.convex.cloud
 - **Components:** none
@@ -12,7 +12,7 @@
 - **Auth:** none
 - **AI models:** none
 - **Started:** 2026-11-15T22:48:28Z
-- **Last updated:** 2026-11-15T23:11:32Z
+- **Last updated:** 2026-11-15T23:19:03Z
 
 ## Log
 
@@ -60,3 +60,11 @@ pointed the Revyl build at it through `EXPO_PUBLIC_CONVEX_URL`
 https://quad-flame-two.vercel.app pushes `connected` and `plan_confirmed`
 events to `POST /quad/event`, and they were checked live in the `activity`
 table.
+
+### 2026-11-15 - 3da19dd
+Documented how the project is built with Convex, Revyl and Capy: a sponsor
+section in `README.md` and a rewritten runbook with done and remaining steps
+(`SPONSORS.md`). Added five Capy thread prompts with expected outcomes and
+checks (`capy/01-revyl-notes-check.md` to `capy/05-bump-haptics.md`,
+`capy/README.md`) and a script that starts a thread from a prompt file through
+the Capy API (`scripts/capy-thread.sh`). No app or Convex code changed.
