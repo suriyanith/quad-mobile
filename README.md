@@ -1,56 +1,103 @@
-# Welcome to your Expo app 👋
+# Quad mobile
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+Companion app for **Quad**, the campus study agent that lives in iMessage. Set up your agent, bump phones with a
+classmate, and watch what your agent did — live.
 
-## Get started
+Expo (SDK 58, Expo Router, TypeScript) + Convex. The Quad server itself is a separate Next.js app at
+`https://quad-flame-two.vercel.app`.
 
-1. Install dependencies
-
-   ```bash
-   npm install
-   ```
-
-2. Start the app
-
-   ```bash
-   npx expo start
-   ```
-
-In the output, you'll find options to open the app in a
-
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
-
-You can start developing by editing the files inside the **src/app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
-
-## Get a fresh project
-
-When you're ready, run:
+## Run it
 
 ```bash
-npm run reset-project
+npm install
+
+# 1. Convex: push schema + functions and write EXPO_PUBLIC_CONVEX_URL to .env.local.
+#    Needs `npx convex login` (interactive) or CONVEX_DEPLOY_KEY in the environment.
+npx convex dev --once
+
+# 2. Shared secret the Quad server uses to push events into the feed.
+npx convex env set QUAD_EVENT_SECRET <value>
+
+# 3. Start the app (press i for the iOS simulator).
+npx expo start
 ```
 
-This command will move the starter code to the **example** directory and create a blank **src/app** directory where you can start developing.
+No Convex account handy? `CONVEX_AGENT_MODE=anonymous npx convex dev` runs a local backend on `127.0.0.1:3210`
+(fine for the simulator on the same machine; not reachable from a cloud device).
 
-### Other setup steps
+### Environment
 
-- To set up ESLint for linting, run `npx expo lint`, or follow our guide on ["Using ESLint and Prettier"](https://docs.expo.dev/guides/using-eslint/)
-- If you'd like to set up unit testing, follow our guide on ["Unit Testing with Jest"](https://docs.expo.dev/develop/unit-testing/)
-- Learn more about the TypeScript setup in this template in our guide on ["Using TypeScript"](https://docs.expo.dev/guides/typescript/)
+| Variable | Default | Purpose |
+| --- | --- | --- |
+| `EXPO_PUBLIC_CONVEX_URL` | none — app shows "Convex not configured" | Convex deployment URL (`https://<name>.convex.cloud`) |
+| `EXPO_PUBLIC_QUAD_URL` | `https://quad-flame-two.vercel.app` | Quad server base URL |
 
-## Learn more
+`EXPO_PUBLIC_*` values are inlined at bundle time: for a simulator/EAS build, set them in `.env.local` (or EAS env)
+before building.
 
-To learn more about developing your project with Expo, look at the following resources:
+### Build for a cloud simulator (Revyl)
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+```bash
+npx expo prebuild --platform ios
+npx expo run:ios --configuration Release        # or: eas build -p ios --profile preview (simulator build)
+```
 
-## Join the community
+Bundle id `ai.quad.app`, scheme `quad`.
 
-Join our community of developers creating universal apps.
+## Screens
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+| Tab | What it does | Key testIDs |
+| --- | --- | --- |
+| Home | First run: name, school, daily minutes → `POST /api/setup`; token saved in SecureStore and mirrored to Convex `students`. Then connection badges from `GET /api/setup/state`, "Finish setup" (opens the setup URL), "Text Quad" (opens `firstMessage.smsUrl`). | `setup-first-name`, `setup-school`, `setup-minutes-60`, `setup-submit`, `badge-canvas`, `badge-google`, `finish-setup`, `text-quad` |
+| Activity | Live `useQuery(api.activity.list)` feed for the student's Quad id. | `activity-list`, `activity-item`, `activity-empty` |
+| Bump | Accelerometer spike > 2.5 g (300 ms debounce) or **Simulate bump** → `POST /api/bump/motion` → waiting → matched code → confirm → connected. Each bump is also recorded in Convex `bumps`. | `simulate-bump`, `bump-status`, `bump-confirm`, `bump-decline`, `bump-reset` |
+| Notes | List + text field + Add, backed by Convex `notes`. | `note-input`, `note-add`, `note-item` |
+
+## Convex backend (`convex/`)
+
+- `schema.ts` — `students`, `activity` (index `by_studentId_and_at`), `bumps` (index `by_ts`), `notes`.
+- `students.get` / `students.upsert`, `activity.list`, `activity.add` (internal), `notes.list` / `notes.add`, `bumps.record`.
+- `http.ts` — `POST /quad/event`.
+
+`convex/_generated/` is produced by `npx convex dev` / `npx convex codegen` and is committed, per Convex convention.
+
+### How the Quad server pushes live updates
+
+HTTP actions are served from the deployment's **site** URL (`https://<name>.convex.site`, also written to
+`.env.local` as `EXPO_PUBLIC_CONVEX_SITE_URL`).
+
+```
+POST https://<name>.convex.site/quad/event
+x-quad-secret: <QUAD_EVENT_SECRET>
+content-type: application/json
+
+{
+  "type": "plan_confirmed",          // connected | plan_confirmed | proactive | session_ready | note
+  "studentId": "stu_abc123",         // Quad student id (state.student.id)
+  "title": "Locked in: CS61B with Maya",
+  "body": "Thu 4pm, Moffitt",        // optional string
+  "at": 1794772800000                // optional; epoch ms or ISO string, defaults to now
+}
+```
+
+| Status | Body | When |
+| --- | --- | --- |
+| 200 | `{"ok":true,"id":"<activity doc id>"}` | inserted |
+| 400 | `{"ok":false,"error":"..."}` | bad JSON, unknown `type`, missing `studentId`/`title`, bad `at` |
+| 401 | `{"ok":false,"error":"unauthorized"}` | missing or wrong `x-quad-secret` |
+| 500 | `{"ok":false,"error":"QUAD_EVENT_SECRET is not set"}` | secret not configured on the deployment |
+
+```bash
+curl -X POST "https://<name>.convex.site/quad/event" \
+  -H "x-quad-secret: $QUAD_EVENT_SECRET" -H "content-type: application/json" \
+  -d '{"type":"proactive","studentId":"stu_abc123","title":"New in CS61B: Project 2 posted","body":"Due Friday"}'
+```
+
+The row appears in the Activity tab immediately — no refresh.
+
+## Checks
+
+```bash
+npx tsc --noEmit
+npx expo export --platform ios
+```
