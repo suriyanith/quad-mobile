@@ -6,6 +6,45 @@ classmate, and watch what your agent did — live.
 Expo (SDK 58, Expo Router, TypeScript) + Convex. The Quad server itself is a separate Next.js app at
 `https://quad-flame-two.vercel.app`.
 
+## Built with Capy, Revyl and Convex
+
+| Tool | What it does in this project |
+| --- | --- |
+| **Convex** | The backend. Tables `students`, `activity`, `bumps`, `notes`; live queries drive the Activity and Notes tabs; the HTTP action `POST /quad/event` lets the Quad server push `connected` and `plan_confirmed` events into the feed. |
+| **Revyl** | Cloud iOS builds (standalone simulator build, JS bundled) from the `preview` profile in `.revyl/config.yaml`, cloud iPhones to run them on, the saved tests in `.revyl/tests/`, and proof of changes on pull requests (`pr_review` is enabled). |
+| **Capy** | Coding agent that opens the pull requests. Each thread in `capy/` is one task: it changes the code, builds on Revyl, checks the result on a cloud iPhone and opens a PR. |
+
+| | |
+| --- | --- |
+| Convex deployment | `fine-octopus-820` (dev) — `https://fine-octopus-820.convex.cloud`, HTTP actions at `https://fine-octopus-820.convex.site` |
+| Revyl project id | `02958253-64e3-4214-a138-683e600dccaf` |
+| Revyl app id (Quad iOS) | `3829cb32-12d5-4c67-9af0-934022af667d` |
+| Revyl builds | `remote-7598560e`, `remote-6a7529db` |
+| Quad platform | https://quad-flame-two.vercel.app |
+
+### Capy setup (5 minutes)
+
+1. Sign in at https://capy.ai with the **hackathon registration email** (the free Capy Max month is tied to
+   it; cloud phones and builds need Pro or higher).
+2. Onboarding -> **Connect GitHub** -> on GitHub choose **Only select repositories** -> `suriyanith/quad-mobile`.
+3. Project menu above the message box -> **New project** -> **GitHub repository** -> `suriyanith/quad-mobile`.
+4. Get a Convex deploy key for the dev deployment. Either copy one straight to the clipboard from this repo
+   (needs `npx convex login`, and `CONVEX_DEPLOY_KEY` must not already be set in the shell):
+   ```bash
+   npx convex deployment token create capy-hackathon --deployment fine-octopus-820 | pbcopy
+   ```
+   or use the dashboard: https://dashboard.convex.dev/t/suriya-nithyanandan/quad-e3178/fine-octopus-820/settings
+   -> **Generate a deploy key** -> **Select all** -> **Create**.
+5. In Capy, with the project selected: **+** in the message box -> **Environment variables** -> **Project** ->
+   Key `CONVEX_DEPLOY_KEY`, Value = the key -> **Add variable**.
+6. Paste the prompt from `capy/01-revyl-notes-check.md` and send it. When the phone card appears choose
+   **Open**.
+7. Review the pull request under **Pull requests** in the side pane and merge it. Then send
+   `capy/02-proof-of-changes.md` through `capy/05-bump-haptics.md`, one thread each.
+
+To start threads from a terminal instead, see `capy/README.md` (`scripts/capy-thread.sh`, needs a
+`CAPY_API_KEY` from Capy **Settings -> API**).
+
 ## Run it
 
 ```bash
