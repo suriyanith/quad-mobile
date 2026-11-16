@@ -10,7 +10,19 @@ test:
     name: Quad iOS   # must match the Revyl app name exactly (revyl app list)
   blocks:
     - type: instructions
+      step_description: Open the Home tab in the bottom tab bar.
+    - type: instructions
+      step_description: Type "Maya" in the first name field.
+    - type: instructions
+      step_description: Type "UC Berkeley" in the school field.
+    - type: instructions
+      step_description: Tap the button that continues or saves the setup form.
+    - type: validation
+      step_description: A button labeled "Text Quad" is visible.
+    - type: instructions
       step_description: Open the Activity tab in the bottom tab bar.
+    - type: validation
+      step_description: The Activity screen shows either activity items or the "No activity yet" empty state, not a loading or setup prompt.
     - type: instructions
       step_description: Pull down on the activity list to refresh it, then release.
     - type: validation
