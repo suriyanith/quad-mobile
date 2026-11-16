@@ -3,16 +3,16 @@
 - **Project:** Quad
 - **Event:** The Consumer Mobile Hackathon
 - **What it does:** Mobile companion for Quad, a campus study agent in iMessage: set up your agent, watch a live activity feed of what it did, bump phones with a classmate, and keep notes.
-- **Live app:** not deployed
+- **Live app:** https://quad-flame-two.vercel.app (the Quad platform this app talks to; start at /setup). The iOS app itself runs on Revyl cloud iPhones, not the App Store.
 - **Repo:** https://github.com/suriyanith/quad-mobile
-- **Frontend:** not deployed
+- **Frontend:** Expo iOS simulator build on Revyl (app "Quad iOS"); passing notes check: https://app.revyl.ai/tests/report?sessionId=a8ba8394-8c17-4d65-9d95-e56a49ddb62b
 - **Convex deployment:** https://fine-octopus-820.convex.cloud
 - **Components:** none
 - **Convex features:** schema, indexes, queries, mutations, internal mutations, HTTP actions, environment variables
 - **Auth:** none
-- **AI models:** none
+- **AI models:** none in this repo; the Quad platform uses OpenAI models for iMessage replies
 - **Started:** 2026-11-15T22:48:28Z
-- **Last updated:** 2026-11-15T23:19:03Z
+- **Last updated:** 2026-11-16T00:30:47Z
 
 ## Log
 
@@ -68,3 +68,11 @@ section in `README.md` and a rewritten runbook with done and remaining steps
 checks (`capy/01-revyl-notes-check.md` to `capy/05-bump-haptics.md`,
 `capy/README.md`) and a script that starts a thread from a prompt file through
 the Capy API (`scripts/capy-thread.sh`). No app or Convex code changed.
+
+### 2026-11-15 - deployed and verified
+The Quad platform is live at https://quad-flame-two.vercel.app and posts
+"Connected" and "Booked" events to this deployment's `/quad/event` HTTP action,
+verified with a real bump on production. Revyl built the app with the Convex
+URL bundled and a cloud iPhone added the note "Study CS61B with Maya". Capy
+pull requests #1 (this skill and log), #2 (Activity pull-to-refresh) and #3
+(Bump haptics) are merged.
