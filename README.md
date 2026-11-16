@@ -1,5 +1,14 @@
 # Quad mobile
 
+## What is Quad
+
+Quad is a campus study agent that lives in iMessage (via Keiki). Connect Canvas and Google once at
+https://quad-flame-two.vercel.app/setup, then text +1 779 625 1378 (first text must include `K-AGWNYZ`).
+When two students bump, their agents exchange six typed messages (class bands, not grades; calendars; a
+proposal; an accept) and each student gets one summary text plus a booked joint study session.
+This repo is the Expo + Convex companion app: setup, a live activity feed, accelerometer bump and notes.
+Hackathon write-up: [SUBMISSION.md](./SUBMISSION.md). Platform repo: https://github.com/SachchitBalamurugan/quad
+
 Companion app for **Quad**, the campus study agent that lives in iMessage. Set up your agent, bump phones with a
 classmate, and watch what your agent did — live.
 
